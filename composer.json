@@ -1,0 +1,17 @@
+{
+    "name": "max107/sms-gateway",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Max107\\SmsGateway\\": ""
+        }
+    },
+    "require": {
+        "php": ">=7.1",
+        "zelenin/smsru": "~4.1",
+        "symfony/options-resolver": "~3.0|~4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5"
+    }
+}
