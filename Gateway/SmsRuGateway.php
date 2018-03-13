@@ -12,9 +12,9 @@ declare(strict_types=1);
 namespace Max107\SmsGateway\Gateway;
 
 use Max107\SmsGateway\AbstractSmsGateway;
+use Max107\SmsGateway\ResponseException;
 use Max107\SmsGateway\BalanceResponse;
 use Max107\SmsGateway\LimitResponse;
-use Max107\SmsGateway\ResponseException;
 use Max107\SmsGateway\SmsException;
 use Max107\SmsGateway\SmsGatewayInterface;
 use Max107\SmsGateway\SmsMessageInterface;
@@ -30,20 +30,21 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
      */
     protected $api;
 
+    public function __construct(array $options)
+    {
+        parent::__construct($options);
+
+        $this->api = $this->createApiClient();
+    }
+
     /**
      * @return Api
      */
-    protected function getClient(): Api
+    protected function createApiClient(): Api
     {
-        if (null === $this->api) {
-            $token = $this->getParameters()->get('api_token');
-            if (empty($token)) {
-                throw new \RuntimeException('Api token cannot be empty');
-            }
-            $this->api = new Api(new ApiIdAuth($token));
-        }
+        $token = $this->getParameters()->get('api_token');
 
-        return $this->api;
+        return new Api(new ApiIdAuth($token));
     }
 
     /**
@@ -71,7 +72,7 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
      */
     public function send(SmsMessageInterface $smsMessage): bool
     {
-        $response = $this->getClient()->smsSend($this->convertSmsMessage($smsMessage));
+        $response = $this->api->smsSend($this->convertSmsMessage($smsMessage));
         if (100 === (int)$response->code) {
             return true;
         }
@@ -102,13 +103,13 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
     {
         try {
             $balance = $this->api->myBalance();
+
+            return new BalanceResponse(
+                (float)$balance->balance
+            );
         } catch (\Exception $e) {
             throw new ResponseException($e->getMessage());
         }
-
-        return new BalanceResponse(
-            (float)$balance->balance
-        );
     }
 
     /**
@@ -117,14 +118,15 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
     public function getLimit(): LimitResponse
     {
         try {
-            $limit = $this->api->myLimit();
+            $response = $this->api->request('my/limit');
+            list($limit, $current) = explode("\n", $response);
+
+            return new LimitResponse(
+                (int)$current,
+                (int)$limit
+            );
         } catch (\Exception $e) {
             throw new ResponseException($e->getMessage());
         }
-
-        return new LimitResponse(
-            (int)$limit->current,
-            (int)$limit->limit
-        );
     }
 }
