@@ -20,7 +20,7 @@ class SmsMessage implements SmsMessageInterface
     /**
      * @var string
      */
-    protected $message;
+    protected $text;
 
     /**
      * SmsMessage constructor.
@@ -33,6 +33,11 @@ class SmsMessage implements SmsMessageInterface
             $method = sprintf('set%s', ucfirst($key));
             if (method_exists($this, $method)) {
                 $this->{$method}($value);
+            } else {
+                throw new \RuntimeException(sprintf(
+                    'Unknown property: %s',
+                    $key
+                ));
             }
         }
     }
@@ -42,21 +47,21 @@ class SmsMessage implements SmsMessageInterface
      *
      * @return $this
      */
-    public function setTo(string $to)
+    public function setTo($to)
     {
-        $this->to = $to;
+        $this->to = (string)$to;
 
         return $this;
     }
 
     /**
-     * @param string $message
+     * @param string $text
      *
      * @return $this
      */
-    public function setMessage(string $message)
+    public function setText($text)
     {
-        $this->message = $message;
+        $this->text = (string)$text;
 
         return $this;
     }
@@ -64,9 +69,9 @@ class SmsMessage implements SmsMessageInterface
     /**
      * @return string
      */
-    public function getMessage(): string
+    public function getText(): string
     {
-        return (string) $this->message;
+        return (string)$this->text;
     }
 
     /**
@@ -74,6 +79,6 @@ class SmsMessage implements SmsMessageInterface
      */
     public function getTo(): string
     {
-        return (string) $this->to;
+        return (string)$this->to;
     }
 }

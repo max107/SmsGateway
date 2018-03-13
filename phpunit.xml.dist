@@ -7,12 +7,17 @@
     <testsuites>
         <testsuite name="all">
             <directory>tests/</directory>
+            <exclude>vendor/</exclude>
         </testsuite>
     </testsuites>
 
     <filter>
         <whitelist>
-            <directory suffix=".php">./src/</directory>
+            <directory>./</directory>
+            <exclude>
+                <directory>./Tests</directory>
+                <directory>./vendor</directory>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>

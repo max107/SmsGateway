@@ -19,7 +19,17 @@ interface SmsMessageInterface
     public function getTo(): string;
 
     /**
+     * @param int|string $to
+     */
+    public function setTo($to);
+
+    /**
      * @return string
      */
-    public function getMessage(): string;
+    public function getText(): string;
+
+    /**
+     * @param string $text
+     */
+    public function setText($text);
 }

@@ -20,7 +20,7 @@ class SmsRegistry
      *
      * @param array $gateways
      */
-    public function __construct(array $gateways)
+    public function __construct(array $gateways = [])
     {
         $this->setGateways($gateways);
     }

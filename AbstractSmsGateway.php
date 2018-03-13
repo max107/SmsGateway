@@ -31,7 +31,7 @@ abstract class AbstractSmsGateway implements SmsGatewayInterface
      */
     public function __construct(array $options)
     {
-        $this->optionsResolver = $this->getOptionsResolver();
+        $this->optionsResolver = $this->createOptionsResolver();
         $this->configureOptions($this->optionsResolver);
         $this->parameters = $this->createParameters($options);
     }
@@ -51,13 +51,13 @@ abstract class AbstractSmsGateway implements SmsGatewayInterface
      */
     private function createParameters(array $options)
     {
-        return new Parameters($this->getOptionsResolver()->resolve($options));
+        return new Parameters($this->optionsResolver->resolve($options));
     }
 
     /**
      * @return OptionsResolver
      */
-    public function getOptionsResolver(): OptionsResolver
+    public function createOptionsResolver(): OptionsResolver
     {
         return new OptionsResolver();
     }

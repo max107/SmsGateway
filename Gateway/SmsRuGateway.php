@@ -22,28 +22,25 @@ use Zelenin\SmsRu\Entity\Sms;
 
 class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
 {
-    /**
-     * @var Api
-     */
     protected $api;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct(array $options)
+    protected function getClient(): Api
     {
-        parent::__construct($options);
-
-        $token = $this->getParameters()->get('api_token');
-        if (empty($token)) {
-            throw new \RuntimeException('Api token cannot be empty');
+        if (null === $this->api) {
+            $token = $this->getParameters()->get('api_token');
+            if (empty($token)) {
+                throw new \RuntimeException('Api token cannot be empty');
+            }
+            $this->api = new Api(new ApiIdAuth($token));
         }
-        $this->api = new Api(new ApiIdAuth($token));
+
+        return $this->api;
     }
 
     protected function configureOptions(OptionsResolver $optionsResolver)
     {
-        $optionsResolver->setRequired(['api_token']);
+        $optionsResolver
+            ->setRequired(['api_token']);
     }
 
     /**
@@ -56,8 +53,8 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
      */
     public function send(SmsMessageInterface $smsMessage): bool
     {
-        $response = $this->api->smsSend($this->convertSmsMessage($smsMessage));
-        if (100 === (int) $response->code) {
+        $response = $this->getClient()->smsSend($this->convertSmsMessage($smsMessage));
+        if (100 === (int)$response->code) {
             return true;
         }
 
@@ -66,6 +63,6 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
 
     protected function convertSmsMessage(SmsMessageInterface $smsMessage): Sms
     {
-        return new Sms($smsMessage->getTo(), $smsMessage->getMessage());
+        return new Sms($smsMessage->getTo(), $smsMessage->getText());
     }
 }
