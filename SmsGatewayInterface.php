@@ -21,4 +21,14 @@ interface SmsGatewayInterface
      * @return bool
      */
     public function send(SmsMessageInterface $smsMessage): bool;
+
+    /**
+     * @return int
+     */
+    public function getLimit(): int;
+
+    /**
+     * @return float
+     */
+    public function getBalance(): float;
 }

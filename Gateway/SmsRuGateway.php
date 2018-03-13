@@ -12,6 +12,9 @@ declare(strict_types=1);
 namespace Max107\SmsGateway\Gateway;
 
 use Max107\SmsGateway\AbstractSmsGateway;
+use Max107\SmsGateway\BalanceResponse;
+use Max107\SmsGateway\LimitResponse;
+use Max107\SmsGateway\ResponseException;
 use Max107\SmsGateway\SmsException;
 use Max107\SmsGateway\SmsGatewayInterface;
 use Max107\SmsGateway\SmsMessageInterface;
@@ -90,5 +93,38 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
         $sms->partner_id = $this->parameters->get('partner_id');
 
         return $sms;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBalance(): BalanceResponse
+    {
+        try {
+            $balance = $this->api->myBalance();
+        } catch (\Exception $e) {
+            throw new ResponseException($e->getMessage());
+        }
+
+        return new BalanceResponse(
+            (float)$balance->balance
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLimit(): LimitResponse
+    {
+        try {
+            $limit = $this->api->myLimit();
+        } catch (\Exception $e) {
+            throw new ResponseException($e->getMessage());
+        }
+
+        return new LimitResponse(
+            (int)$limit->current,
+            (int)$limit->limit
+        );
     }
 }
