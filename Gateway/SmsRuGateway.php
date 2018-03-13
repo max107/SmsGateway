@@ -22,8 +22,14 @@ use Zelenin\SmsRu\Entity\Sms;
 
 class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
 {
+    /**
+     * @var Api
+     */
     protected $api;
 
+    /**
+     * @return Api
+     */
     protected function getClient(): Api
     {
         if (null === $this->api) {
@@ -37,9 +43,18 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
         return $this->api;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function configureOptions(OptionsResolver $optionsResolver)
     {
         $optionsResolver
+            ->setDefaults([
+                // На пиво разработчику
+                'partner_id' => 153212,
+                'translit' => false,
+                'test' => false,
+            ])
             ->setRequired(['api_token']);
     }
 
@@ -61,8 +76,19 @@ class SmsRuGateway extends AbstractSmsGateway implements SmsGatewayInterface
         throw new SmsException($response->getDescription());
     }
 
+    /**
+     * @param SmsMessageInterface $smsMessage
+     *
+     * @return Sms
+     */
     protected function convertSmsMessage(SmsMessageInterface $smsMessage): Sms
     {
-        return new Sms($smsMessage->getTo(), $smsMessage->getText());
+        $sms = new Sms($smsMessage->getTo(), $smsMessage->getText());
+
+        $sms->test = $this->parameters->get('test');
+        $sms->translit = $this->parameters->get('translit');
+        $sms->partner_id = $this->parameters->get('partner_id');
+
+        return $sms;
     }
 }
